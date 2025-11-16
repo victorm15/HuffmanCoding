@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "huffman_tree.h"
-#include "bit_writer.h"
+#include "bit_editor.h"
 #include <stdbool.h>
 #include <math.h>
 

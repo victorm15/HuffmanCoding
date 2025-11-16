@@ -1,4 +1,4 @@
-#include "bit_writer.h"
+#include "bit_editor.h"
 
 #include <stdbool.h>
 #include <stdlib.h>

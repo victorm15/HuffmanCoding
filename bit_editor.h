@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include "huffman_types.h"
 
-#ifndef BIT_WRITER_H
+#ifndef BIT_EDITOR_H
 
-#define BIT_WRITER_H
+#define BIT_EDITOR_H
 
 
 
