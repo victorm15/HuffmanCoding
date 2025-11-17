@@ -36,5 +36,7 @@ Decoding Compression
     1. If bit is '0', declare left and right children and recursively call to read children
     2. If bit is '1', set held symbol to the next 8 bits
 3. Decode input
+    1. Traverse left for '0' and right for '1' until leaf node is found
+    2. Repeat for the amount of symbols acquired from the header
 
 
