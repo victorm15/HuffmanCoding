@@ -38,5 +38,9 @@ Decoding Compression
 3. Decode input
     1. Traverse left for '0' and right for '1' until leaf node is found
     2. Repeat for the amount of symbols acquired from the header
+  
+## Results on Compressing Moby Dick
+
+
 
 
