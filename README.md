@@ -41,6 +41,9 @@ Decoding Compression
   
 ## Results on Compressing Moby Dick
 
+| Original Size | Compressed Size | Header Size | Symbol Entropy (bits) | Average Codeword Length (bits) | Compression Efficiency | Compression Power |
+| ------------- | --------------- | ----------- | --------------------- | ------------------------------ | ---------------------- | ----------------- |
+| 643.2 KB      | 365.2 KB        | 110.9 Bytes | 4.50                  | 4.54                           | 99%                    | 1.76              |
 
 
 
