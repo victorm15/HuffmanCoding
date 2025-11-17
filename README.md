@@ -23,4 +23,11 @@ Decoding Compression
     1. Write a '0' bit for an internal node, or a '1' followed by the symbol held represented by ASCII for a leaf node
     2. Write left child
     3. Write right child
-4. 
+
+## Writing Input Data
+
+1. Create a lookup table for symbol codewords from the Huffman tree, e.g. table['a'] = 101
+2. Iterate through input, writing each symbol's codeword
+3. Pad end with '0's to write to the next byte
+
+
