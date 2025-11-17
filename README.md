@@ -1,13 +1,13 @@
 # Huffman Coding
 
-Constructing Huffman tree
-Encoding tree
-Encoding Characters
-Decoding Compression
+A Huffman Coding program to investigate the compression algorithm's effectiveness on natural language
 
 ## Features
-* Used a time-optimal min-heap priority queue to construct the Huffman tree
+* Uses a time-optimal min-heap priority queue to construct the Huffman tree
+* Uses a lookup table to encode symbols
+* Encodes a memory-optimal pre-order travesal of the Huffman tree
 * Supports full-input compression or chunk-based compression based on byte count
+* Writes data to a .xlsx file
 
 ## Compressing
 ### Constructing the Huffman Tree
