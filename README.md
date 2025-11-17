@@ -20,5 +20,7 @@ Decoding Compression
 
 1. Write an 8-byte unsigned long of the number of symbols in input
 2. Encode and write huffman tree
-    1. Start
-    2. 
+    a. Write a '0' bit for an internal node, or a '1' followed by the symbol held represented by ASCII for a leaf node
+    b. Write left child
+    c. Write right child
+4. 
