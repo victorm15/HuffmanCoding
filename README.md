@@ -5,7 +5,7 @@ A Huffman Coding program to investigate the compression algorithm's effectivenes
 ## Features
 * Uses a time-optimal min-heap priority queue to construct the Huffman tree
 * Uses a lookup table to encode symbols
-* Encodes a memory-optimal pre-order travesal of the Huffman tree
+* Encodes a memory-optimal pre-order traversal of the Huffman tree
 * Supports full-input compression or chunk-based compression based on byte count
 * Writes data to a .xlsx file
 
