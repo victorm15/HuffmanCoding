@@ -27,68 +27,51 @@ void write_symbol(bit_editor *bw, Lookup table[256], unsigned char symbol) {
         write_bit(bw, bit);
     
     }
-
-
-
 }
 
 void write_input(bit_editor *bw, Lookup table[256], FILE *input) {
-    rewind(input);
-    
-    while(true) {
-        char symbol = fgetc(input);
-        if (feof(input)) break;
-        write_symbol(bw, table, (unsigned char)symbol);
+    int c;
+    while ((c = fgetc(input)) != EOF) {
+        write_symbol(bw, table, (unsigned char)c);
     }
 }
 
 void write_block(bit_editor *bw, Lookup table[256], FILE *input, uint64_t *max_bytes) {
     fseek(input, -(long)(*max_bytes), SEEK_CUR);
-    
-    for(uint64_t i = 0; i < *max_bytes; i ++) {
-        char symbol = fgetc(input);
-        if (symbol == EOF) break;
-        write_symbol(bw, table, (unsigned char)symbol);
+    for (uint64_t i = 0; i < *max_bytes; i ++) {
+        int c = fgetc(input);
+        if (c == EOF) break;
+        write_symbol(bw, table, (unsigned char)c);
     }
 
 }
 
 void write_padding(bit_editor *bw) {
-
     if (bw->bit_count) {
         bw->buffer <<= (8 - bw->bit_count);
         fwrite(&(bw->buffer), 1, 1, bw->file);
         bw->buffer = 0;
         bw->bit_count = 0;
     }
-
-
 }
 
 void write_tree(bit_editor *bw, Node* tree) {
-
-    if (tree->symbol) {
+    if (is_leaf(tree)) {
         // Node is a leaf node
-
         write_bit(bw, 1); // Wrie '1' to signify leaf node
-
         // Write symbol
         for(int i = sizeof(tree->symbol) * BITS_PER_BYTE - 1; i >= 0; i --) {
             int bit = (tree->symbol >> i) & 1u;
             write_bit(bw, bit);
         }
-
     }
     else {
         // Node is an internal node
-
         // Write '0' to signify internal node
         write_bit(bw, 0);
-
         write_tree(bw, tree->left_child);
         write_tree(bw, tree->right_child);
     }
-
 }
 
 
@@ -122,7 +105,7 @@ void read_tree(bit_editor *br, Node* tree) {
 
     // If bit stores leaf node
     if (is_leaf) {
-        char symbol = 0;
+        unsigned char symbol = 0;
 
         for (int i = 0; i < 8; i++) {
             int bit = read_bit(br);
@@ -134,10 +117,10 @@ void read_tree(bit_editor *br, Node* tree) {
     }
     // If bit stores leaf node
     else {
-        tree->left_child = malloc(sizeof(Node));
+        tree->left_child = calloc(1, sizeof(Node));
         read_tree(br, tree->left_child);
 
-        tree->right_child = malloc(sizeof(Node));
+        tree->right_child = calloc(1, sizeof(Node));
         read_tree(br, tree->right_child);
 
     }
@@ -146,7 +129,7 @@ void read_tree(bit_editor *br, Node* tree) {
 }
 
 char read_symbol(bit_editor *br, Node* tree) {
-    while (!tree->symbol) {
+    while (!is_leaf(tree)) {
         int bit = read_bit(br);
 
         tree = bit? tree->right_child : tree->left_child;

@@ -43,34 +43,24 @@ Node* popMin(Node** symbols, int* num_nodes) {
 }
 
 void insert(Node** symbols, int* num_nodes, Node* new_node) {
-
     // No need to realloc — size of binary heap will never exceed original allocated size (2 removals for every insert)
-
     symbols[*num_nodes] = new_node;
-
     int parent = (*num_nodes - 1) / 2;
     (*num_nodes) ++;
-
     while (parent > 0) {
         Sink(symbols, parent, num_nodes);
         parent = (parent - 1) / 2;
     }
-
     Sink(symbols, 0, num_nodes);
-
-
-
-    
-
 }
 
 
 void scan_input(int alphabet_frequencies[256], int *num_nodes, FILE *input, uint64_t *bytes_read) {
 
     // Set alphabet frequencies
-    while (true) {
-        char symbol = fgetc(input);
-        if (feof(input)) break;
+    int c;
+    while ((c = fgetc(input)) != EOF) {
+        unsigned char symbol = (unsigned char)c;
         (*bytes_read) ++;
         if (!alphabet_frequencies[symbol]) (*num_nodes) ++;
         alphabet_frequencies[symbol]++;
@@ -79,15 +69,14 @@ void scan_input(int alphabet_frequencies[256], int *num_nodes, FILE *input, uint
 
 bool scan_some_input(int alphabet_frequencies[256], int *num_nodes, FILE *input, uint64_t *bytes_read, uint64_t *max_bytes) {
     
-    char symbol;
-    while (*bytes_read < *max_bytes && (symbol = fgetc(input)) != EOF) {
+    int c;
+    while (*bytes_read < *max_bytes && (c = fgetc(input)) != EOF) {
+        unsigned char symbol = (unsigned char)c;
         if (alphabet_frequencies[symbol] == 0) (*num_nodes)++;
         alphabet_frequencies[symbol]++;
         (*bytes_read)++;
     }
-
-    // Return false if end of file was hit
-    return (*bytes_read == *max_bytes);
+    return *bytes_read > 0;
 }
 
 
@@ -104,7 +93,7 @@ Node** heapify(int *num_nodes, const int alphabet_frequencies[256]) {
     int index = 0;
     for (int i = 0; i < 256; i ++) {
         if (alphabet_frequencies[i]) {
-            Node* new_node = malloc(sizeof(Node));
+            Node* new_node = calloc(1, sizeof(Node));
             new_node->symbol = i;
             new_node->frequency = alphabet_frequencies[i];
             symbols[index] = new_node;
@@ -131,7 +120,7 @@ Node* huffman_tree(Node** symbols, int *num_nodes) {
     while (*num_nodes != 1) {
         Node* n1 = popMin(symbols, num_nodes);
         Node* n2 = popMin(symbols, num_nodes);
-        Node* new_node = malloc(sizeof(Node));
+        Node* new_node = calloc(1, sizeof(Node));
         new_node->frequency = n1->frequency + n2->frequency;
         new_node->left_child = n1;
         new_node->right_child = n2;
@@ -144,13 +133,14 @@ Node* huffman_tree(Node** symbols, int *num_nodes) {
 
 void print_huffman_tree(Node *tree, char *buffer, int length) {
 
-    if (tree->symbol) {
+    if (is_leaf(tree)) {
         printf("%s: %c\n", buffer, tree->symbol);
     }
     else {
-        length ++;
-        char *new_buffer = malloc(length * sizeof(char));
-        strcpy(new_buffer, buffer);
+       length ++;
+        char *new_buffer = malloc(length + 1);  // +1 for the null terminator
+        memcpy(new_buffer, buffer, length - 1);
+        new_buffer[length] = '\0';
 
         new_buffer[length-1] = '0';
         print_huffman_tree(tree->left_child, new_buffer, length);
@@ -158,15 +148,15 @@ void print_huffman_tree(Node *tree, char *buffer, int length) {
         new_buffer[length-1] = '1';
         print_huffman_tree(tree->right_child, new_buffer, length);
 
-
+        free(new_buffer);
     }
 
 
 }
 
-void build_table(Lookup table[256], Node* tree, uint32_t buffer, int length) {
+void build_table(Lookup table[256], Node* tree, uint64_t buffer, int length) {
 
-    if (tree->symbol) {
+    if (is_leaf(tree)) {
         table[tree->symbol].buffer = buffer;
         table[tree->symbol].bit_count = length;
         return;
@@ -174,7 +164,13 @@ void build_table(Lookup table[256], Node* tree, uint32_t buffer, int length) {
 
     build_table(table, tree->left_child, buffer << 1, length + 1);
     
-    build_table(table, tree->right_child, buffer << 1 | true, length + 1);
+    build_table(table, tree->right_child, buffer << 1 | 1, length + 1);
 
 }
 
+void free_tree(Node *tree) {
+    if (tree == NULL) return;
+    free_tree(tree->left_child);
+    free_tree(tree->right_child);
+    free(tree);
+}
