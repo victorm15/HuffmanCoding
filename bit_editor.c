@@ -101,10 +101,10 @@ void read_header(bit_editor *br, uint64_t *num_symbols) {
 void read_tree(bit_editor *br, Node* tree) {
 
     
-    int is_leaf = read_bit(br);
+    int leaf_bit = read_bit(br);
 
     // If bit stores leaf node
-    if (is_leaf) {
+    if (leaf_bit) {
         unsigned char symbol = 0;
 
         for (int i = 0; i < 8; i++) {
