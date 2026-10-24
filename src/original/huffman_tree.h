@@ -7,10 +7,6 @@
 
 #define HUFFMAN_TREE_H
 
-
-
-
-
 Node** heapify(int *num_nodes, const int alphabet_frequencies[256]);
 
 Node* huffman_tree(Node** symbols, int *num_nodes);

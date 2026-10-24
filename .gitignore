@@ -1,4 +1,6 @@
 build/
-output/
+build-debug/
+build-release/
+output/*
 *.bin
 .DS_Store
