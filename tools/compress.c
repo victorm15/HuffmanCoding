@@ -36,28 +36,36 @@ int main(int argc, char** argv) {
 
     uint64_t symbol_frequencies[256] = {0};
     const SymbolCounts counts = scan_input(input, symbol_frequencies);
-    const int distinct_symbols = counts.n_distinct_symbols;
-    if (distinct_symbols <= 1) {
-        fprintf(stderr, "Input had no or only one distinct symbol read\n");
-        return 1;
-    }
-    Node nodes[2*distinct_symbols-1];
-    int node_heap[2*distinct_symbols-1];
-    build_leaves(nodes, node_heap, symbol_frequencies);
-    heapify(nodes, node_heap, distinct_symbols);
-    const int tree_idx = build_huffman_tree(nodes, node_heap, distinct_symbols);
-    Codeword symbol_to_codeword[ALPHABET_SIZE] = {0};
-    build_lookup_table(symbol_to_codeword, nodes, tree_idx, 0, 0);
-
-    rewind(input);
     file_buffer bw = {.buffer = 0, .bit_count = 0, .file = output};
     write_symbol_count(&bw, counts.n_symbols);
-    write_header(&bw, nodes, tree_idx);
-    write_contents(&bw, symbol_to_codeword, input);
+
+    // An empty input is just the zero symbol count, with no tree or contents
+    if (counts.n_symbols > 0) {
+        // A tree needs at least two leaves, so a single-symbol input gets an unused dummy leaf giving it a 1-bit code
+        const int n_leaves = counts.n_distinct_symbols == 1 ? 2 : counts.n_distinct_symbols;
+        Node nodes[2*n_leaves-1];
+        int node_heap[2*n_leaves-1];
+        build_leaves(nodes, node_heap, symbol_frequencies);
+        if (counts.n_distinct_symbols == 1) {
+            nodes[1] = (Node){.symbol = (unsigned char)(nodes[0].symbol + 1), .frequency = 0, .left_child = -1, .right_child = -1};
+            node_heap[1] = 1;
+        }
+        heapify(nodes, node_heap, n_leaves);
+        const int tree_idx = build_huffman_tree(nodes, node_heap, n_leaves);
+        Codeword symbol_to_codeword[ALPHABET_SIZE] = {0};
+        build_lookup_table(symbol_to_codeword, nodes, tree_idx, 0, 0);
+
+        rewind(input);
+        write_tree(&bw, nodes, tree_idx);
+        write_contents(&bw, symbol_to_codeword, input);
+    }
     write_padding(&bw);
 
     fclose(input);
-    fclose(output);
+    if (fclose(output) != 0) {
+        perror(out_path);
+        return 1;
+    }
 
     return 0;
 }

@@ -6,17 +6,9 @@
 #include "types.h"
 #include "huffman_tree.h"
 
-#define BITS_PER_BYTE 8
-
-typedef struct {
-    unsigned char buffer;
-    int bit_count;
-    FILE* file;
-} file_buffer;
-
 void write_symbol_count(file_buffer *bw, uint64_t symbol_count);
 
-void write_header(file_buffer *bw, const Node nodes[], int root_idx);
+void write_tree(file_buffer *bw, const Node nodes[], int root_idx);
 
 void write_contents(file_buffer *bw, const Codeword table[256], FILE *input);
 

@@ -13,13 +13,19 @@ endif()
 add_library(huffman STATIC
   src/huffman_tree.c
   src/code_io.c
+  src/csv_writer.c
 )
 target_include_directories(huffman PUBLIC src)
+find_library(MATH_LIBRARY m)
+if(MATH_LIBRARY)
+  target_link_libraries(huffman PUBLIC ${MATH_LIBRARY})
+endif()
 target_compile_options(huffman PRIVATE -Wall -Wextra)
 
 set(TOOLS
   compress
   decode
+  write_results
 )
 
 foreach(tool IN LISTS TOOLS)

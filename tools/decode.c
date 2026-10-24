@@ -40,13 +40,19 @@ int main(int argc, char** argv) {
 
     Node nodes[2*ALPHABET_SIZE-1]; // upper-bound on tree size
     const uint64_t symbol_count = read_symbol_count(&br);
-    int tree_idx = 0;
-    read_header(&br, nodes, &tree_idx);
-    tree_idx = 0;
-    write_decoded_contents(&br, &bw, nodes, tree_idx, symbol_count);
+    // An empty original file is stored as just the zero symbol count, with no tree
+    if (symbol_count > 0) {
+        int tree_idx = 0;
+        read_header(&br, nodes, &tree_idx);
+        tree_idx = 0;
+        write_decoded_contents(&br, &bw, nodes, tree_idx, symbol_count);
+    }
 
     fclose(input);
-    fclose(output);
+    if (fclose(output) != 0) {
+        perror(out_path);
+        return 1;
+    }
 
 
     return 0;

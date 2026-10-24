@@ -19,7 +19,7 @@ void write_symbol_count(file_buffer *bw, uint64_t symbol_count) {
     }
 }
 
-void write_header(file_buffer *bw, const Node nodes[], int root_idx) {
+void write_tree(file_buffer *bw, const Node nodes[], int root_idx) {
     if (is_leaf(nodes[root_idx])) {
         write_bit(bw, Leaf);
         for(int i = BITS_PER_BYTE - 1; i >= 0; --i) {
@@ -29,8 +29,8 @@ void write_header(file_buffer *bw, const Node nodes[], int root_idx) {
     }
     else {
         write_bit(bw, Internal);
-        write_header(bw, nodes, nodes[root_idx].left_child);
-        write_header(bw, nodes, nodes[root_idx].right_child);
+        write_tree(bw, nodes, nodes[root_idx].left_child);
+        write_tree(bw, nodes, nodes[root_idx].right_child);
     }
 }
 
@@ -47,7 +47,7 @@ void write_contents(file_buffer *bw, const Codeword symbol_to_codeword[256], FIL
 void write_padding(file_buffer *bw) {
     if (bw->bit_count) {
         bw->buffer <<= (8 - bw->bit_count);
-        fwrite(&(bw->buffer), 1, 1, bw->file);
+        if (fwrite(&(bw->buffer), 1, 1, bw->file) != 1) { perror("write"); exit(1); }
         bw->buffer = 0;
         bw->bit_count = 0;
     }

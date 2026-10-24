@@ -1,10 +1,23 @@
 #include "types.h"
 #include "huffman_tree.h"
+#include <math.h>
 
 SymbolCounts scan_input(FILE *input, uint64_t symbol_frequencies[static ALPHABET_SIZE]) {
     int c;
     SymbolCounts counts = {.n_symbols = 0, .n_distinct_symbols = 0};
     while ((c = getc_unlocked(input)) != EOF) {
+        unsigned char symbol = (unsigned char)c;
+        if (symbol_frequencies[symbol] == 0) ++counts.n_distinct_symbols;
+        ++symbol_frequencies[symbol];
+        ++counts.n_symbols;
+    }
+    return counts;
+}
+
+SymbolCounts scan_input_chunk(FILE *input, uint64_t symbol_frequencies[static ALPHABET_SIZE], uint64_t max_symbols) {
+    int c;
+    SymbolCounts counts = {.n_symbols = 0, .n_distinct_symbols = 0};
+    while (counts.n_symbols < max_symbols && (c = getc_unlocked(input)) != EOF) {
         unsigned char symbol = (unsigned char)c;
         if (symbol_frequencies[symbol] == 0) ++counts.n_distinct_symbols;
         ++symbol_frequencies[symbol];
@@ -90,4 +103,17 @@ void build_lookup_table(Codeword symbol_to_codeword[static ALPHABET_SIZE], const
     }
     build_lookup_table(symbol_to_codeword, nodes, nodes[root_idx].left_child, buffer << 1, bit_count + 1);
     build_lookup_table(symbol_to_codeword, nodes, nodes[root_idx].right_child, buffer << 1 | 1u, bit_count + 1);
+}
+
+void analyse_huffman_tree(const Node nodes[], int node_idx, uint64_t n_symbols, int codeword_length, CompressionResult* result) {
+    if (is_leaf(nodes[node_idx])) {
+        result->compressed_bits += nodes[node_idx].frequency * codeword_length;
+        double p_symbol = (double)nodes[node_idx].frequency / n_symbols;
+        result->avg_codeword_length +=  p_symbol*codeword_length;
+        result->entropy -= p_symbol * log2(p_symbol);
+    }
+    else {
+        analyse_huffman_tree(nodes, nodes[node_idx].left_child, n_symbols, codeword_length+1, result);
+        analyse_huffman_tree(nodes, nodes[node_idx].right_child, n_symbols, codeword_length+1, result);
+    }
 }

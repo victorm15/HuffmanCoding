@@ -5,12 +5,6 @@
 #include <stdbool.h>
 #include "types.h"
 
-#define ALPHABET_SIZE 256
-
-enum NodeType {Internal, Leaf};
-
-// void print_huffman_tree(Node *tree, char *buffer, int length);
-
 void build_leaves(Node nodes[], int node_heap[], const uint64_t symbol_frequencies[static ALPHABET_SIZE]);
 
 void heapify(Node nodes[], int node_heap[], int distinct_symbols);
@@ -21,10 +15,10 @@ void build_lookup_table(Codeword symbol_to_codeword[static ALPHABET_SIZE], const
 
 SymbolCounts scan_input(FILE *input, uint64_t symbol_frequencies[static ALPHABET_SIZE]);
 
+SymbolCounts scan_input_chunk(FILE *input, uint64_t symbol_frequencies[static ALPHABET_SIZE], uint64_t max_symbols);
+
 static inline int is_leaf(const Node n) { return n.left_child == -1 && n.right_child == -1; }
 
-// bool scan_some_input(int alphabet_frequencies[256], int *num_nodes, FILE *input, uint64_t *bytes_read, uint64_t *max_bytes);
-
-// void free_tree(Node *tree);
+void analyse_huffman_tree(const Node nodes[], int node_idx, uint64_t n_symbols, int codeword_length, CompressionResult* result);
 
 #endif
